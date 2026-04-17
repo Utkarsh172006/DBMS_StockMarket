@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stock Market</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    :root {
+      --bg: #050505;
+      --bg2: #121212;
+      --bg3: #1c1c1c;
+      --primary: #8b5cf6;
+      --primary-glow: rgba(139, 92, 246, 0.4);
+      --primary-d: #7c3aed;
+      --secondary: #ec4899;
+      --green: #10b981;
+      --red: #f43f5e;
+      --yellow: #f59e0b;
+      --text: #ffffff;
+      --muted: #94a3b8;
+      --border: rgba(255, 255, 255, 0.1);
+      --border-bright: rgba(255, 255, 255, 0.2);
+      --card-bg: rgba(20, 20, 20, 0.7);
+      --radius: 20px;
+      --nav-w: 280px;
+    }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideIn { from { transform: translateX(-30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes gradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+    @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-20px); } }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    @keyframes glow { 0%, 100% { filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.3)); } 50% { filter: drop-shadow(0 0 25px rgba(139, 92, 246, 0.6)); } }
+    @keyframes rotateGradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+    @keyframes slideInDown { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes shimmer { 0% { background-position: -1000px 0; } 100% { background-position: 1000px 0; } }
+    @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background: 
+        url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" result="noise"/><feColorMatrix in="noise" type="saturate" values="0.2"/></filter></defs><rect width="100" height="100" fill="%23000000" filter="url(%23noise)"/></svg>');
+      background-size: 100px 100px;
+      opacity: 0.08;
+      animation: shimmer 8s infinite;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background: 
+        radial-gradient(circle at 15% 15%, rgba(255,255,255,0.05) 0%, transparent 30%),
+        radial-gradient(circle at 85% 85%, rgba(255,255,255,0.04) 0%, transparent 24%);
+      animation: none;
+    }
+
+    /* Animated floating orbs */
+    @keyframes orb1 { 0% { transform: translate(0, 0) scale(1); } 33% { transform: translate(30px, -40px) scale(1.1); } 66% { transform: translate(-20px, 30px) scale(0.9); } 100% { transform: translate(0, 0) scale(1); } }
+    @keyframes orb2 { 0% { transform: translate(0, 0) scale(1); } 33% { transform: translate(-30px, 40px) scale(0.9); } 66% { transform: translate(20px, -30px) scale(1.1); } 100% { transform: translate(0, 0) scale(1); } }
+
+    #app { position: relative; z-index: 1; animation: fadeIn 0.8s ease; }
+
+    /* ── AUTH ─────────────────────────────────── */
+    .auth-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+      background: radial-gradient(circle at 20% 20%, rgba(139, 92, 246, 0.18), transparent 22%),
+        radial-gradient(circle at 80% 18%, rgba(236, 72, 153, 0.12), transparent 18%),
+        linear-gradient(135deg, #0b1221 0%, #121a2e 45%, #101726 100%);
+      background-size: 180% 180%;
+      animation: cinematicGradient 20s ease infinite;
+    }
+
+    @keyframes cinematicGradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Cinematic overlay */
+    .auth-screen::before {
+      content: '';
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.2) 0%, transparent 70%);
+      border-radius: 50%;
+      top: -100px;
+      right: -100px;
+      animation: orb1 8s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .auth-screen::after {
+      content: '';
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(236, 72, 153, 0.2) 0%, transparent 70%);
+      border-radius: 50%;
+      bottom: -100px;
+      left: -100px;
+      animation: orb2 8s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+
+    /* Minimalist RISK Typography Background */
+    .auth-screen-background {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.3;
+    }
+
+    .risk-typography {
+      font-size: clamp(8rem, 25vw, 20rem);
+      font-weight: 900;
+      letter-spacing: 0.15em;
+      color: transparent;
+      background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.1) 0%,
+        rgba(255, 255, 255, 0.2) 50%,
+        rgba(139, 92, 246, 0.15) 100%
+      );
+      -webkit-background-clip: text;
+      background-clip: text;
+      text-shadow: 
+        0 0 40px rgba(139, 92, 246, 0.3),
+        0 0 80px rgba(236, 72, 153, 0.2);
+      filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.2));
+      animation: typographyGlow 4s ease-in-out infinite;
+      font-family: 'Arial', 'Helvetica', sans-serif;
+      font-style: italic;
+    }
+
+    @keyframes typographyGlow {
+      0%, 100% {
+        filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.2)) drop-shadow(0 0 10px rgba(236, 72, 153, 0.1));
+      }
+      50% {
+        filter: drop-shadow(0 0 40px rgba(139, 92, 246, 0.4)) drop-shadow(0 0 20px rgba(236, 72, 153, 0.3));
+      }
+    }
+
+    .auth-box {
+      width: 100%; max-width: 440px; background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(139, 92, 246, 0.18); border-radius: 32px; padding: 3.5rem 3rem; box-shadow: 
+        0 50px 100px -20px rgba(0, 0, 0, 0.9),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 0 40px rgba(139, 92, 246, 0.12); 
+      animation: fadeIn 0.5s ease; position: relative; overflow: hidden; z-index: 2; border-radius: 32px; 
+    }
+    
+    .auth-box::before { 
+      content: ''; 
+      position: absolute; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      background: linear-gradient(
+        180deg,
+        rgba(139, 92, 246, 0.06) 0%,
+        transparent 60%
+      ); 
+      pointer-events: none;
+      border-radius: 32px;
+    }
+
+    .auth-box::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 1.5px;
+      background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.5), transparent);
+      background-size: 200% 100%;
+      animation: none;
+      border-radius: 32px 32px 0 0;
+    }
+
+    .auth-logo { text-align: center; margin-bottom: 3rem; animation: fadeIn 0.6s ease; position: relative; z-index: 3; }
+    .auth-logo .icon { font-size: 4rem; margin-bottom: 0.5rem; animation: none; filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.2)); }
+    .auth-logo h1 { font-size: 2.8rem; font-weight: 900; letter-spacing: -0.035em; color: #ffffff; animation: none; margin-bottom: 0.5rem; }
+    .auth-logo p { color: #a0aec0; font-size: 0.95rem; font-weight: 500; animation: fadeIn 0.5s ease; letter-spacing: 0.3px; }
+
+    .tabs { display: flex; background: rgba(255, 255, 255, 0.02); border-radius: 14px; padding: 4px; margin-bottom: 2.2rem; border: 1px solid rgba(139, 92, 246, 0.15); animation: fadeIn 0.5s ease; position: relative; z-index: 3; gap: 4px; }
+    .tab { flex: 1; padding: 0.85rem; text-align: center; border-radius: 11px; cursor: pointer; color: #94a3b8; font-size: 0.9rem; font-weight: 700; transition: all 0.25s ease; letter-spacing: 0.4px; }
+    .tab.active { background: linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(124, 58, 237, 0.8)); color: #fff; box-shadow: 0 8px 16px rgba(139, 92, 246, 0.25); }
+
+    .field { margin-bottom: 1.35rem; animation: fadeIn 0.4s ease; position: relative; z-index: 3; }
+    .field:nth-child(1) { animation-delay: 0s; }
+    .field:nth-child(2) { animation-delay: 0.05s; }
+    .field:nth-child(3) { animation-delay: 0.1s; }
+    .field:nth-child(4) { animation-delay: 0.15s; }
+    .field label { display: block; font-size: 0.8rem; color: #cbd5e1; font-weight: 700; margin-bottom: 0.6rem; letter-spacing: 0.04em; text-transform: uppercase; }
+    .field input, .field select {
+      width: 100%; padding: 0.95rem 1.1rem; border-radius: 12px; border: 1.5px solid rgba(139, 92, 246, 0.2); background: rgba(15, 23, 42, 0.6); color: var(--text); font-size: 0.95rem; transition: all 0.25s ease; font-family: inherit; backdrop-filter: blur(4px);
+    }
+    .field input::placeholder { color: #64748b; }
+    .field input:focus, .field select:focus { outline: none; border-color: var(--primary); background: rgba(25, 35, 55, 0.8); box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.1), 0 0 12px rgba(139, 92, 246, 0.18); }
+    .field select option { background: var(--bg2); }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.75rem; padding: 1rem 1.75rem; border: none; border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-family: inherit; position: relative; overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: transparent;
+      transform: translateX(-100%);
+      animation: none;
+    }
+
+    .btn-primary { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: #fff; width: 100%; justify-content: center; box-shadow: 0 10px 24px rgba(139, 92, 246, 0.35); position: relative; letter-spacing: 0.5px; font-size: 1.05rem; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(139, 92, 246, 0.45); }
+    .btn-primary:active { transform: translateY(0px); box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3); }
+
+    .btn-danger { background: linear-gradient(135deg, var(--red), #e11d48); color: #fff; box-shadow: 0 8px 16px -4px rgba(244, 63, 94, 0.3); position: relative; }
+    .btn-danger:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 12px 24px -6px rgba(244, 63, 94, 0.4); }
+
+    .btn-sm { padding: 0.6rem 1.25rem; font-size: 0.85rem; border-radius: 12px; }
+
+    .alert {
+      padding: 1rem 1.15rem;
+      border-radius: 11px;
+      font-size: .875rem;
+      margin-top: 1.2rem;
+      animation: slideInDown 0.3s ease;
+      font-weight: 500;
+      border: 1px solid;
+      line-height: 1.5;
+    }
+
+    .alert-err {
+      background: rgba(239, 68, 68, .1);
+      color: #fecaca;
+      border-color: rgba(239, 68, 68, .3);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);
+    }
+
+    .alert-ok {
+      background: rgba(34, 197, 94, .1);
+      color: #86efac;
+      border-color: rgba(34, 197, 94, .3);
+      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.1);
+    }
+
+    .alert-info {
+      background: rgba(59, 130, 246, .12);
+      color: #93c5fd;
+      border: 1px solid rgba(59, 130, 246, .25);
+    }
+
+    .link-btn {
+      background: none;
+      border: none;
+      color: #a78bfa;
+      cursor: pointer;
+      font-size: .875rem;
+      font-family: inherit;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      font-weight: 600;
+      padding: 0 2px;
+    }
+
+    .link-btn:hover { color: #c4b5fd; text-decoration: underline; }
+
+    /* ── DASHBOARD LAYOUT ─────────────────────── */
+    .layout { display: flex; min-height: 100vh; }
+
+    .sidebar {
+      width: var(--nav-w); background: rgba(5, 5, 5, 0.5); backdrop-filter: blur(20px); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 2.5rem 1.5rem; position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 10;
+    }
+
+    .sidebar::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(180deg, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .sidebar-logo { display: flex; align-items: center; gap: 1rem; padding: 0.5rem 0.5rem 2.5rem; margin-bottom: 2rem; position: relative; z-index: 1; animation: fadeIn 0.4s ease; }
+    .sidebar-logo .icon { font-size: 2.2rem; filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.15)); animation: none; }
+    .sidebar-logo span { font-size: 1.4rem; font-weight: 900; letter-spacing: -0.04em; background: linear-gradient(135deg, #fff, #94a3b8); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+
+    .nav-section {
+      font-size: 0.75rem; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.15em; padding: 1.5rem 1rem 0.75rem; opacity: 0.6; position: relative; z-index: 1;
+    }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 1.1rem; padding: 0.9rem 1.25rem; border-radius: 16px; cursor: pointer; color: var(--muted); font-size: 0.95rem; font-weight: 600; transition: all 0.2s ease; margin-bottom: 8px; border: 1px solid transparent; animation: fadeIn 0.3s ease; position: relative; z-index: 1;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.05); color: #fff; transform: translateX(6px); }
+    .nav-item.active { background: linear-gradient(90deg, rgba(139, 92, 246, 0.15), transparent); color: var(--primary); border-left: 3px solid var(--primary); padding-left: calc(1.25rem - 3px); box-shadow: inset 10px 0 20px -10px var(--primary-glow); }
+    .nav-item .ni { font-size: 1.4rem; width: 28px; text-align: center; transition: transform 0.3s ease; }
+    .nav-item:hover .ni { transform: scale(1.2) rotate(-10deg); }
+
+    .sidebar-footer { margin-top: auto; padding-top: 2rem; border-top: 1px solid var(--border); position: relative; z-index: 1; }
+    .user-chip {
+      display: flex; align-items: center; gap: 1rem; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 20px; margin-bottom: 1.5rem; border: 1px solid var(--border); transition: all 0.3s ease;
+    }
+    .user-chip:hover { background: rgba(255,255,255,0.06); transform: translateY(-2px); border-color: var(--border-bright); }
+    .avatar {
+      width: 46px; height: 46px; border-radius: 14px; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; font-weight: 900; color: #fff; font-size: 1.25rem; flex-shrink: 0; box-shadow: 0 8px 16px rgba(139, 92, 246, 0.2); animation: none;
+    }
+    .user-info .name { font-weight: 800; font-size: 0.95rem; color: #fff; }
+    .user-info .role { font-size: 0.75rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    .main { margin-left: var(--nav-w); flex: 1; padding: 4rem; max-width: 1500px; }
+    .page-header { margin-bottom: 3.5rem; animation: fadeIn 0.4s ease; }
+    .page-header h2 { font-size: 2.5rem; font-weight: 900; letter-spacing: -0.04em; color: #ffffff; animation: none; -webkit-background-clip: unset; background-clip: unset; -webkit-text-fill-color: unset; }
+    .page-header p { color: var(--muted); font-size: 1.1rem; margin-top: 0.75rem; font-weight: 500; }
+
+    /* Cards */
+    .card {
+      background: rgba(18, 18, 18, 0.5); backdrop-filter: blur(25px); border: 1px solid var(--border); border-radius: 30px; padding: 2.5rem; box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.3); transition: all 0.3s ease; position: relative; overflow: hidden;
+    }
+    .card:hover { transform: translateY(-3px); border-color: var(--border-bright); box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.4); }
+    .card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, rgba(255,255,255,0.03), transparent); pointer-events: none; animation: none; }
+
+    .card-title { font-size: 1.25rem; font-weight: 800; margin-bottom: 0.6rem; letter-spacing: -0.02em; }
+    .card-sub { font-size: 1rem; color: var(--muted); margin-bottom: 2rem; font-weight: 500; }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; margin-bottom: 3.5rem; }
+    .stat-card {
+      background: rgba(255, 255, 255, 0.02); border: 2px solid transparent; border-radius: 24px; padding: 2rem; transition: all 0.3s ease; animation: fadeIn 0.4s ease; position: relative;
+    }
+    .stat-card:nth-child(1) { animation-delay: 0s; }
+    .stat-card:nth-child(2) { animation-delay: 0.05s; }
+    .stat-card:nth-child(3) { animation-delay: 0.1s; }
+    .stat-card:nth-child(4) { animation-delay: 0.15s; }
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 24px;
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), transparent);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+    .stat-card:hover::before { opacity: 1; }
+    .stat-card:hover { background: rgba(255, 255, 255, 0.05); border-color: rgba(139, 92, 246, 0.2); transform: scale(1.01) translateY(-3px); }
+
+    .stat-label { font-size: 0.8rem; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 1rem; }
+    .stat-value { font-size: 2.5rem; font-weight: 900; letter-spacing: -0.03em; }
+    .stat-green { color: var(--green); filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.3)); }
+    .stat-blue { color: var(--primary); filter: drop-shadow(0 0 8px var(--primary-glow)); }
+    .table-wrap { overflow-x: auto; margin-top: 1rem; }
+    table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
+    th {
+      padding: 1.25rem; text-align: left; font-size: 0.7rem; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.15em; border-bottom: 2px solid var(--border);
+    }
+    td { padding: 1.5rem 1.25rem; background: rgba(255,255,255,0.02); font-size: 1rem; font-weight: 500; transition: all 0.3s ease; }
+    td:first-child { border-radius: 16px 0 0 16px; }
+    td:last-child { border-radius: 0 16px 16px 0; }
+    tr:hover td { background: rgba(255, 255, 255, 0.05); transform: scale(1.005); }
+
+    .badge {
+      display: inline-flex; align-items: center; justify-content: center; padding: 0.45rem 1rem; border-radius: 12px; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.05em; border: 1px solid transparent; text-transform: uppercase; animation: none;
+    }
+    .badge-green { background: rgba(16, 185, 129, 0.1); color: #34d399; border-color: rgba(16, 185, 129, 0.2); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1); }
+    .badge-blue { background: rgba(139, 92, 246, 0.1); color: #a78bfa; border-color: rgba(139, 92, 246, 0.2); box-shadow: 0 4px 12px rgba(139, 92, 246, 0.1); }
+    .badge-red { background: rgba(244, 63, 94, 0.1); color: #fb7185; border-color: rgba(244, 63, 94, 0.2); box-shadow: 0 4px 12px rgba(244, 63, 94, 0.1); }
+    .badge-yellow { background: rgba(245, 158, 11, 0.1); color: #fbbf24; border-color: rgba(245, 158, 11, 0.2); box-shadow: 0 4px 12px rgba(245, 158, 11, 0.1); }
+
+    .empty {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--muted);
+      animation: fadeIn 0.4s ease;
+    }
+
+    .empty .ei {
+      font-size: 2.5rem;
+      margin-bottom: .75rem;
+      animation: none;
+    }
+
+    /* Form panel */
+    .form-panel {
+      max-width: 480px;
+      animation: slideIn 0.6s ease;
+    }
+
+    .action-result {
+      margin-top: 1.25rem;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8); z-index: 100; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px); animation: fadeIn 0.3s ease;
+    }
+
+    .modal-box {
+      background: var(--bg2); border: 1px solid var(--border-bright); border-radius: 28px; padding: 2.5rem; width: 100%; max-width: 460px; box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6); animation: slideInDown 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .modal-box h3 { font-size: 1.25rem; font-weight: 800; margin-bottom: 1.5rem; letter-spacing: -0.02em; }
+    .modal-footer { display: flex; gap: 1rem; margin-top: 2rem; }
+    .btn-outline { background: rgba(255,255,255,0.03); border: 1px solid var(--border); color: var(--text); flex: 1; justify-content: center; transition: all 0.2s ease; }
+    .btn-outline:hover { background: rgba(255,255,255,0.08); border-color: var(--muted); transform: translateY(-2px); }
+
+    .dashboard-hero { display: grid; grid-template-columns: 1fr auto; gap: 1.5rem; align-items: center; margin-bottom: 2.5rem; padding: 2rem; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 28px; box-shadow: 0 20px 40px rgba(0,0,0,0.25); animation: fadeIn 0.5s ease; }
+    .hero-copy { max-width: 720px; }
+    .hero-copy .hero-pill { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.9rem; border-radius: 999px; background: rgba(139, 92, 246, 0.12); color: #d8b4fe; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.85rem; }
+    .hero-copy h3 { font-size: clamp(1.75rem, 2.25vw, 2.5rem); margin-bottom: 0.75rem; letter-spacing: -0.04em; }
+    .hero-copy p { color: var(--muted); line-height: 1.75; max-width: 680px; }
+    .hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.85rem; }
+    .filter-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; margin-bottom: 1.5rem; padding: 1.2rem 1.5rem; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 22px; }
+    .filter-bar label { font-weight: 700; color: var(--muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.12em; }
+    .filter-input { flex: 1; min-width: 220px; padding: 0.95rem 1.2rem; border-radius: 14px; border: 1px solid var(--border); background: rgba(0,0,0,0.18); color: var(--text); }
+    .filter-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.2); }
+    @media (max-width: 900px) {
+      .dashboard-hero { grid-template-columns: 1fr; }
+      .hero-actions { justify-content: flex-start; }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+
+    <!-- ══ AUTH SCREEN ══════════════════════════════════════════════════ -->
+    <div class="auth-screen" v-if="page === 'login' || page === 'register'">
+      <div class="auth-screen-background">
+        <div class="risk-typography">Stocks</div>
+      </div>
+      <div class="auth-box">
+        <div class="auth-logo">
+          <div class="icon"></div>
+          <h1>Tradex</h1>
+          <p>{{ page === 'login' ? 'Sign in to your account' : 'Create a new account' }}</p>
+        </div>
+
+        <!-- LOGIN -->
+        <template v-if="page === 'login'">
+          <div class="tabs">
+            <div class="tab" :class="{active: loginType==='user'}" @click="loginType='user'">User</div>
+            <div class="tab" :class="{active: loginType==='admin'}" @click="loginType='admin'">Admin</div>
+          </div>
+          <form @submit.prevent="doLogin">
+            <div class="field"><label>Email Address</label><input type="email" v-model="loginEmail" required
+                placeholder="you@example.com"></div>
+            <div class="field"><label>Password</label><input type="password" v-model="loginPass" required
+                placeholder="••••••••"></div>
+            <button type="submit" class="btn btn-primary">Sign In</button>
+            <div class="alert alert-err" v-if="authErr">{{ authErr }}</div>
+          </form>
+          <p style="text-align:center;margin-top:1.5rem;color:#94a3b8;font-size:.875rem;letter-spacing:0.3px">
+            No account? <button class="link-btn" @click="goRegister">Register here</button>
+          </p>
+        </template>
+
+        <!-- REGISTER -->
+        <template v-if="page === 'register'">
+          <form @submit.prevent="doRegister">
+            <div class="field"><label>Full Name</label><input type="text" v-model="regName" required
+                placeholder="John Doe"></div>
+            <div class="field"><label>Email Address</label><input type="email" v-model="regEmail" required
+                placeholder="you@example.com"></div>
+            <div class="field"><label>Password</label><input type="password" v-model="regPass" required
+                placeholder="Minimum 4 characters"></div>
+            <div class="field"><label>Confirm Password</label><input type="password" v-model="regPass2" required
+                placeholder="Repeat password"></div>
+            <button type="submit" class="btn btn-primary">Create Account</button>
+            <div class="alert alert-err" v-if="authErr">{{ authErr }}</div>
+            <div class="alert alert-ok" v-if="authOk">{{ authOk }}</div>
+          </form>
+          <p style="text-align:center;margin-top:1.5rem;color:#94a3b8;font-size:.875rem;letter-spacing:0.3px">
+            Have an account? <button class="link-btn" @click="page='login'">Sign in</button>
+          </p>
+        </template>
+      </div>
+    </div>
+
+    <!-- ══ USER DASHBOARD ═══════════════════════════════════════════════ -->
+    <div class="layout" v-if="page === 'user-dash'">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-logo">
+          <span class="icon"></span>
+          <span>Tradex</span>
+        </div>
+        <div class="nav-section">Main</div>
+        <div v-for="item in navItems" :key="item.id" class="nav-item" :class="{active: activePanel===item.id}"
+          @click="activePanel=item.id; item.onOpen && item.onOpen()">
+          <span class="ni">{{ item.icon }}</span> {{ item.label }}
+        </div>
+        <div class="sidebar-footer">
+          <div class="user-chip">
+            <div class="avatar">{{ userName.charAt(0).toUpperCase() }}</div>
+            <div class="user-info">
+              <div class="name">{{ userName }}</div>
+              <div class="role">Investor</div>
+            </div>
+          </div>
+          <div class="nav-item" style="color:var(--red)" @click="logout">
+            <span class="ni">🚪</span> Logout
+          </div>
+        </div>
+      </aside>
+
+      <!-- Content -->
+      <main class="main">
+        <div class="dashboard-hero" v-if="page === 'user-dash'">
+          <div class="hero-copy">
+            <span class="hero-pill">Live trading dashboard</span>
+            <h3>Good {{ greeting }}, {{ userName }}.</h3>
+            <p>Monitor your balance, trade with confidence, and keep your portfolio moving with real-time insights.</p>
+          </div>
+          <div class="hero-actions">
+            <button type="button" class="btn btn-sm btn-primary" @click="activePanel='wallet-bal'">Wallet</button>
+            <button type="button" class="btn btn-sm btn-outline" @click="activePanel='buy'">Buy</button>
+            <button type="button" class="btn btn-sm btn-outline" @click="activePanel='sell'">Sell</button>
+            <button type="button" class="btn btn-sm btn-outline" @click="activePanel='live'">Market</button>
+          </div>
+        </div>
+
+        <!-- Panels for users -->
+        <div v-if="activePanel==='wallet-add'">
+          <!-- ... (existing Add Funds panel) -->
+          <div class="page-header">
+            <h2>💳 Add Funds to Wallet</h2>
+            <p>Top up your trading wallet</p>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-label">Current Balance</div>
+              <div class="stat-value stat-green">₹{{ walletBalance.toFixed(2) }}</div>
+            </div>
+          </div>
+          <div class="card form-panel">
+            <div class="card-title">Deposit Funds</div>
+            <div class="card-sub">Enter the amount you want to add to your wallet</div>
+            <form @submit.prevent="addFunds">
+              <div class="field"><label>Amount (INR)</label><input type="number" v-model="addAmt" step="0.01" min="1"
+                  required placeholder="e.g. 500.00"></div>
+              <button type="submit" class="btn btn-primary">➕ Add Funds</button>
+            </form>
+            <div class="alert alert-ok action-result" v-if="actionOk">{{ actionOk }}</div>
+            <div class="alert alert-err action-result" v-if="actionErr">{{ actionErr }}</div>
+          </div>
+        </div>
+        <div v-if="activePanel==='wallet-bal'">
+          <!-- ... (existing Wallet Balance panel) -->
+          <div class="page-header">
+            <h2>👛 Wallet Balance</h2>
+            <p>Your current wallet information</p>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-label">Available Balance</div>
+              <div class="stat-value stat-green">₹{{ walletBalance.toFixed(2) }}</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Portfolio Value</div>
+              <div class="stat-value stat-blue">₹{{ portfolioValue.toFixed(2) }}</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Total Net Worth</div>
+              <div class="stat-value">₹{{ (walletBalance + portfolioValue).toFixed(2) }}</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Recent Transactions</div>
+            <div class="card-sub">Your last activity</div>
+            <div class="table-wrap">
+              <table v-if="transactions.length">
+                <thead>
+                  <tr>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="tx in transactions.slice(0,8)" :key="tx.date+tx.type">
+                    <td><span class="badge" :class="tx.type.includes('BUY') ? 'badge-red' : 'badge-green'">{{ tx.type
+                        }}</span></td>
+                    <td>₹{{ tx.amount.toFixed(2) }}</td>
+                    <td style="color:var(--muted);font-size:.82rem">{{ tx.date }}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="empty" v-else>
+                <div class="ei">📋</div>No transactions yet.
+              </div>
+            </div>
+          </div>
+        </div>
+        <div v-if="activePanel==='buy'">
+          <!-- ... (existing Buy Stocks panel) -->
+          <div class="page-header">
+            <h2>🛒 Buy Stocks</h2>
+            <p>Purchase shares from the market</p>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-label">Wallet Balance</div>
+              <div class="stat-value stat-green">₹{{ walletBalance.toFixed(2) }}</div>
+            </div>
+          </div>
+          <div class="card form-panel">
+            <div class="card-title">Place Buy Order</div>
+            <div class="card-sub">Select a stock and quantity to purchase</div>
+            <form @submit.prevent="buyStock">
+              <div class="field"><label>Stock Symbol</label>
+                <select v-model="buySymbol" required>
+                  <option value="" disabled>-- Select a stock --</option>
+                  <option v-for="s in allStocks" :key="s.symbol" :value="s.symbol">{{ s.symbol }} — {{ s.name }} (₹{{
+                    Number(s.price).toFixed(2) }})</option>
+                </select>
+              </div>
+              <div class="field"><label>Quantity</label><input type="number" v-model="buyQty" min="1" required
+                  placeholder="e.g. 5"></div>
+              <div class="alert alert-info" v-if="buySymbol && buyQty">
+                Estimated cost: <strong>₹{{ estimatedBuyCost }}</strong>
+              </div>
+              <button type="submit" class="btn btn-primary" style="margin-top:.75rem">🛒 Buy Now</button>
+            </form>
+            <div class="alert alert-ok action-result" v-if="actionOk">{{ actionOk }}</div>
+            <div class="alert alert-err action-result" v-if="actionErr">{{ actionErr }}</div>
+          </div>
+        </div>
+        <div v-if="activePanel==='sell'">
+          <!-- ... (existing Sell Stocks panel) -->
+          <div class="page-header">
+            <h2>💰 Sell Stocks</h2>
+            <p>Sell your holdings</p>
+          </div>
+          <div class="card form-panel">
+            <div class="card-title">Place Sell Order</div>
+            <div class="card-sub">Select a stock from your portfolio to sell</div>
+            <form @submit.prevent="sellStock">
+              <div class="field"><label>Stock to Sell</label>
+                <select v-model="sellSymbol" required>
+                  <option value="" disabled>-- Select from your holdings --</option>
+                  <option v-for="s in portfolio" :key="s.symbol" :value="s.symbol">{{ s.symbol }} — {{ s.name }} (Own:
+                    {{ s.qty }}, ₹{{ Number(s.price).toFixed(2) }}/share)</option>
+                </select>
+              </div>
+              <div class="field"><label>Quantity to Sell</label><input type="number" v-model="sellQty" min="1" required
+                  placeholder="e.g. 2"></div>
+              <div class="alert alert-info" v-if="sellSymbol && sellQty">
+                Estimated revenue: <strong>₹{{ estimatedSellRevenue }}</strong>
+              </div>
+              <button type="submit" class="btn btn-primary" style="background:var(--green);margin-top:.75rem">💰 Sell
+                Now</button>
+            </form>
+            <div class="alert alert-ok action-result" v-if="actionOk">{{ actionOk }}</div>
+            <div class="alert alert-err action-result" v-if="actionErr">{{ actionErr }}</div>
+          </div>
+        </div>
+        <div v-if="activePanel==='profit'">
+          <!-- ... (existing Profit/Loss panel) -->
+          <div class="page-header">
+            <h2>📊 Profit / Loss</h2>
+            <p>Overview of your portfolio value</p>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-label">Total Portfolio Value</div>
+              <div class="stat-value stat-green">₹{{ portfolioValue.toFixed(2) }}</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Stocks Held</div>
+              <div class="stat-value stat-blue">{{ portfolio.length }} stocks</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Holdings Breakdown</div>
+            <div class="card-sub">Current market value of each position</div>
+            <div class="table-wrap">
+              <table v-if="portfolio.length">
+                <thead>
+                  <tr>
+                    <th>Symbol</th>
+                    <th>Name</th>
+                    <th>Shares</th>
+                    <th>Price/Share</th>
+                    <th>Total Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="s in portfolio" :key="s.symbol">
+                    <td><span class="badge badge-blue">{{ s.symbol }}</span></td>
+                    <td>{{ s.name }}</td>
+                    <td>{{ s.qty }}</td>
+                    <td>₹{{ Number(s.price).toFixed(2) }}</td>
+                    <td style="color:var(--green);font-weight:600">₹{{ (s.qty * s.price).toFixed(2) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="empty" v-else>
+                <div class="ei">📉</div>No stocks in portfolio yet.
+              </div>
+            </div>
+          </div>
+        </div>
+        <div v-if="activePanel==='history'">
+          <!-- ... (existing history panel) -->
+          <div class="page-header">
+            <h2>📋 Transaction History</h2>
+            <p>All your past transactions</p>
+          </div>
+          <div class="card">
+            <div class="card-title">All Transactions</div>
+            <div class="card-sub">Complete record of wallet and trading activity</div>
+            <div class="table-wrap">
+              <table v-if="transactions.length">
+                <thead>
+                  <tr>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Date & Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="tx in transactions" :key="tx.date+tx.type+tx.amount">
+                    <td>
+                      <span class="badge"
+                        :class="tx.type.includes('BUY') ? 'badge-red' : tx.type.includes('SELL') ? 'badge-green' : 'badge-blue'">
+                        {{ tx.type }}
+                      </span>
+                    </td>
+                    <td :style="{color: tx.type.includes('BUY') ? 'var(--red)' : 'var(--green)'}">
+                      {{ tx.type.includes('BUY') ? '-' : '+' }}₹{{ tx.amount.toFixed(2) }}
+                    </td>
+                    <td style="color:var(--muted);font-size:.82rem">{{ tx.date }}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="empty" v-else>
+                <div class="ei">📋</div>No transactions found.
+              </div>
+            </div>
+          </div>
+        </div>
+        <div v-if="activePanel==='live'">
+          <div class="page-header">
+            <h2>⚡ Live Market Feed (IBM)</h2>
+            <p>External stock data from Alpha Vantage</p>
+          </div>
+
+          <div class="card" style="margin-bottom:2rem">
+            <div class="card-title" style="display:flex; align-items:center; gap:0.6rem">
+              <span class="badge badge-yellow" style="font-size:1rem">IBM</span>
+              International Business Machines
+              <span class="badge badge-blue" style="font-size:0.75rem; margin-left:auto" v-if="ibmData">Date: {{ ibmDate
+                }}</span>
+            </div>
+            <div class="card-sub">Data source: Alpha Vantage DAILY Feed</div>
+
+            <div class="table-wrap">
+              <table v-if="ibmData">
+                <thead>
+                  <tr>
+                    <th>Statistic</th>
+                    <th>Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Open</td>
+                    <td style="color:var(--text); font-weight:600">₹{{ Number(ibmData['1. open']).toFixed(2) }}</td>
+                  </tr>
+                  <tr>
+                    <td>🔥 High</td>
+                    <td style="color:var(--green); font-weight:600">₹{{ Number(ibmData['2. high']).toFixed(2) }}</td>
+                  </tr>
+                  <tr>
+                    <td>❄️ Low</td>
+                    <td style="color:var(--red); font-weight:600">₹{{ Number(ibmData['3. low']).toFixed(2) }}</td>
+                  </tr>
+                  <tr>
+                    <td>✅ Close</td>
+                    <td style="color:var(--primary); font-weight:600">₹{{ Number(ibmData['4. close']).toFixed(2) }}</td>
+                  </tr>
+                  <tr>
+                    <td>📊 Volume</td>
+                    <td style="color:var(--muted)">{{ Number(ibmData['5. volume']).toLocaleString() }}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="empty" v-else-if="loadingIbm">
+                <div class="ei" style="animation: spin 1s infinite linear">⌛</div> Fetching live IBM data...
+              </div>
+              <div class="empty" v-else>
+                <div class="ei" style="color:var(--red)">❌</div> No data found for specified date (2026-04-02).
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Internal Market Prices</div>
+            <div class="card-sub">Prices as recorded in your local database</div>
+            <div class="table-wrap">
+              <table v-if="allStocks.length">
+                <thead>
+                  <tr>
+                    <th>Symbol</th>
+                    <th>Company Name</th>
+                    <th>Price</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="s in allStocks" :key="s.symbol">
+                    <td><span class="badge badge-yellow">{{ s.symbol }}</span></td>
+                    <td>{{ s.name }}</td>
+                    <td style="color:var(--yellow); font-weight:600">₹{{ Number(s.price).toFixed(2) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="empty" v-else>
+                <div class="ei">📡</div>No internal stocks available.
+              </div>
+            </div>
+          </div>
+        </div>
+        <div v-if="activePanel==='details'">
+          <!-- ... (existing details panel) -->
+          <div class="page-header">
+            <h2>🔎 Stock Details</h2>
+            <p>Detailed information on each stock</p>
+          </div>
+          <div class="filter-bar">
+            <label>Search stocks</label>
+            <input type="search" class="filter-input" v-model="stockSearch" placeholder="Filter by symbol or company name">
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:1rem"
+            v-if="filteredStocks.length">
+            <div class="card" v-for="s in filteredStocks" :key="s.symbol">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.75rem">
+                <span class="badge badge-blue" style="font-size:.9rem;padding:.35rem .9rem">{{ s.symbol }}</span>
+                <span style="font-size:1.25rem;font-weight:700;color:var(--green)">₹{{ Number(s.price).toFixed(2)
+                  }}</span>
+              </div>
+              <div style="font-weight:600;margin-bottom:.25rem">{{ s.name }}</div>
+              <div style="font-size:.82rem;color:var(--muted)">Click Buy to purchase shares</div>
+            </div>
+          </div>
+          <div class="empty" v-else>
+            <div class="ei">📦</div>
+            <div v-if="allStocks.length">No matching stocks found.</div>
+            <div v-else>No stocks added by admin yet.</div>
+          </div>
+        </div>
+        <div v-if="activePanel==='my-stocks'">
+          <!-- ... (existing my-stocks panel) -->
+          <div class="page-header">
+            <h2>💼 Your Stocks</h2>
+            <p>Stocks currently in your portfolio</p>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-label">Total Holdings</div>
+              <div class="stat-value stat-blue">{{ portfolio.length }} stocks</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Portfolio Value</div>
+              <div class="stat-value stat-green">₹{{ portfolioValue.toFixed(2) }}</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">My Portfolio</div>
+            <div class="card-sub">All stocks you currently own</div>
+            <div class="table-wrap">
+              <table v-if="portfolio.length">
+                <thead>
+                  <tr>
+                    <th>Symbol</th>
+                    <th>Name</th>
+                    <th>Shares</th>
+                    <th>Price</th>
+                    <th>Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="s in portfolio" :key="s.symbol">
+                    <td><span class="badge badge-green">{{ s.symbol }}</span></td>
+                    <td>{{ s.name }}</td>
+                    <td>{{ s.qty }}</td>
+                    <td>₹{{ Number(s.price).toFixed(2) }}</td>
+                    <td style="color:var(--green);font-weight:600">₹{{ (s.qty * s.price).toFixed(2) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="empty" v-else>
+                <div class="ei">💼</div>You haven't bought any stocks yet.
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- ══ ADMIN DASHBOARD ══════════════════════════════════════════════ -->
+    <div class="layout" v-if="page === 'admin-dash'">
+      <aside class="sidebar">
+        <div class="sidebar-logo"><span class="icon"></span><span></span></div>
+        <div class="nav-section">Admin</div>
+        <div v-for="item in adminNavItems" :key="item.id" class="nav-item" :class="{active: activePanel===item.id}"
+          @click="activePanel=item.id; item.onOpen && item.onOpen()">
+          <span class="ni">{{ item.icon }}</span> {{ item.label }}
+        </div>
+        <div class="sidebar-footer">
+          <div class="user-chip">
+            <div class="avatar" style="background:#ef4444">A</div>
+            <div class="user-info">
+              <div class="name">{{ userName }}</div>
+              <div class="role">Admin</div>
+            </div>
+          </div>
+          <div class="nav-item" style="color:var(--red)" @click="logout"><span class="ni">🚪</span> Logout</div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <!-- 1. Add New Stock -->
+        <div v-if="activePanel==='admin-add'">
+          <div class="page-header">
+            <h2>➕ Add New Stock</h2>
+            <p>List a new stock on the market</p>
+          </div>
+          <div class="card form-panel">
+            <form @submit.prevent="adminAddStock">
+              <div class="field"><label>Symbol</label><input type="text" v-model="stockSymbol" required
+                  placeholder="e.g. AAPL"></div>
+              <div class="field"><label>Company Name</label><input type="text" v-model="stockName" required
+                  placeholder="e.g. Apple Inc."></div>
+              <div class="field"><label>Initial Price</label><input type="number" step="0.01" v-model="stockPrice"
+                  required placeholder="e.g. 150.50"></div>
+              <button type="submit" class="btn btn-primary">➕ Add Stock</button>
+            </form>
+            <div class="alert alert-ok action-result" v-if="actionOk">{{ actionOk }}</div>
+            <div class="alert alert-err action-result" v-if="actionErr">{{ actionErr }}</div>
+          </div>
+        </div>
+
+        <!-- 2. Update Stock Details -->
+        <div v-if="activePanel==='admin-update'">
+          <div class="page-header">
+            <h2>🔄 Update Stock</h2>
+            <p>Change price or name of a stock</p>
+          </div>
+          <div class="card form-panel">
+            <form @submit.prevent="adminUpdateStock">
+              <div class="field"><label>Symbol</label>
+                <select v-model="stockSymbol" required>
+                  <option value="" disabled>-- Select a stock --</option>
+                  <option v-for="s in allStocks" :key="s.symbol" :value="s.symbol">{{ s.symbol }} — {{ s.name }}
+                  </option>
+                </select>
+              </div>
+              <div class="field"><label>New Name (optional)</label><input type="text" v-model="stockName"
+                  placeholder="Keep current if blank"></div>
+              <div class="field"><label>New Price (optional)</label><input type="number" step="0.01"
+                  v-model="stockPrice" placeholder="Keep current if blank"></div>
+              <button type="submit" class="btn btn-primary">🔄 Update Stock</button>
+            </form>
+            <div class="alert alert-ok action-result" v-if="actionOk">{{ actionOk }}</div>
+            <div class="alert alert-err action-result" v-if="actionErr">{{ actionErr }}</div>
+          </div>
+        </div>
+
+        <!-- 3. Remove Stock -->
+        <div v-if="activePanel==='admin-remove'">
+          <div class="page-header">
+            <h2>❌ Remove Stock</h2>
+            <p>Delist a stock from the market</p>
+          </div>
+          <div class="card form-panel">
+            <form @submit.prevent="adminRemoveStock">
+              <div class="field"><label>Symbol</label>
+                <select v-model="stockSymbol" required>
+                  <option value="" disabled>-- Select a stock --</option>
+                  <option v-for="s in allStocks" :key="s.symbol" :value="s.symbol">{{ s.symbol }} — {{ s.name }}
+                  </option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-danger" style="width:100%">❌ Remove Stock</button>
+            </form>
+            <div class="alert alert-ok action-result" v-if="actionOk">{{ actionOk }}</div>
+            <div class="alert alert-err action-result" v-if="actionErr">{{ actionErr }}</div>
+          </div>
+        </div>
+
+        <!-- 4. View All Stocks -->
+        <div v-if="activePanel==='admin-stocks'">
+          <div class="page-header">
+            <h2>📊 All Stocks</h2>
+            <p>Global market overview</p>
+          </div>
+          <div class="filter-bar">
+            <label>Search stocks</label>
+            <input type="search" class="filter-input" v-model="stockSearch" placeholder="Filter by symbol or name">
+          </div>
+          <div class="card">
+            <div class="table-wrap">
+              <table v-if="filteredStocks.length">
+                <thead>
+                  <tr>
+                    <th>Symbol</th>
+                    <th>Name</th>
+                    <th>Price</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="s in filteredStocks" :key="s.symbol">
+                    <td><span class="badge badge-blue">{{ s.symbol }}</span></td>
+                    <td>{{ s.name }}</td>
+                    <td style="color:var(--green);font-weight:600">₹{{ Number(s.price).toFixed(2) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="empty" v-else>
+                <div class="ei">📦</div>No stocks yet.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. View All Users -->
+        <div v-if="activePanel==='admin-users'">
+          <div class="page-header">
+            <h2>👥 All Users</h2>
+            <p>Manage registered users</p>
+          </div>
+          <div class="card">
+            <div class="table-wrap">
+              <table v-if="adminUsers.length">
+                <thead>
+                  <tr>
+                    <th>User Name</th>
+                    <th>Email</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="user in adminUsers" :key="user.id">
+                    <td style="font-weight:600">{{ user.name }}</td>
+                    <td style="color:var(--primary)">{{ user.email }}</td>
+                    <td>
+                      <button class="btn-danger" @click="deleteUser(user.id, user.name)" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
+                        Remove
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="empty" v-else>
+                <div class="ei">👥</div>
+                <div>No users registered yet.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="activePanel==='admin-db'">
+          <div class="page-header">
+            <h2>🗄️ Database View</h2>
+            <p>Complete data from all system tables</p>
+          </div>
+          <div v-for="(rows, table) in dbDump" :key="table" v-if="Object.keys(dbDump).length" class="card"
+            style="margin-bottom:2rem">
+            <div class="card-title"
+              style="text-transform:uppercase; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem">
+              <span style="color:var(--primary)">📁</span> {{ table }}
+              <span class="badge badge-blue" style="font-size:0.7rem">{{ rows.length }} rows</span>
+            </div>
+            <div class="table-wrap" style="max-height: 400px;">
+              <table v-if="rows.length">
+                <thead>
+                  <tr>
+                    <th v-for="(val, key) in rows[0]" :key="key">{{ key }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(row, idx) in rows" :key="idx">
+                    <td v-for="(val, key) in row" :key="key">
+                      <span v-if="key === 'password' && table !== 'stocks'" style="filter:blur(3px)"
+                        title="Hidden for security">●●●●●●</span>
+                      <span v-else-if="key === 'email' || key === 'symbol'"
+                        style="color:var(--primary); font-weight:500">{{ val }}</span>
+                      <span v-else-if="key === 'amount' || key === 'balance' || key === 'price' || key === 'value'"
+                        style="color:var(--green); font-weight:600">₹{{ Number(val).toFixed(2) }}</span>
+                      <span v-else>{{ val }}</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="empty" v-else style="padding: 1.5rem;">
+                <div class="ei" style="font-size:1.5rem">📭</div> Table is empty.
+              </div>
+            </div>
+          </div>
+          <div class="empty" v-if="!Object.keys(dbDump).length">
+            <div class="ei">⌛</div> Loading database tables...
+          </div>
+        </div>
+
+      </main>
+    </div>
+
+  </div>
+
+  <script>
+    const { createApp, ref, computed } = Vue;
+    createApp({
+      setup() {
+        const page = ref('login');
+        const loginType = ref('user');
+        const loginEmail = ref(''); const loginPass = ref('');
+        const regName = ref(''); const regEmail = ref(''); const regPass = ref(''); const regPass2 = ref('');
+        const userName = ref('');
+        const authErr = ref(''); const authOk = ref('');
+        const activePanel = ref('wallet-add');
+
+        const walletBalance = ref(0);
+        const portfolio = ref([]);
+        const allStocks = ref([]);
+        const transactions = ref([]);
+        const adminUsers = ref([]);
+        const dbDump = ref({});
+        const ibmData = ref({ "1. open": "145.20", "2. high": "148.50", "3. low": "144.10", "4. close": "147.30", "5. volume": "4500000" });
+        const ibmDate = ref('2026-04-02 (Simulated)');
+        const loadingIbm = ref(false);
+
+        // Admin form fields
+        const stockSymbol = ref(''); const stockName = ref(''); const stockPrice = ref('');
+        const addAmt = ref('');
+        const buySymbol = ref(''); const buyQty = ref('');
+        const sellSymbol = ref(''); const sellQty = ref('');
+        const stockSearch = ref(''); const userSearch = ref('');
+        const actionOk = ref(''); const actionErr = ref('');
+
+        let currentEmail = '';
+
+        const navItems = [
+          { id: 'wallet-add', icon: '💳', label: 'Add Funds', onOpen: () => fetchWallet() },
+          { id: 'wallet-bal', icon: '👛', label: 'Wallet Balance', onOpen: () => { fetchWallet(); fetchTransactions(); } },
+          { id: 'buy', icon: '🛒', label: 'Buy Stocks', onOpen: () => { fetchWallet(); fetchStocks(); } },
+          { id: 'sell', icon: '💰', label: 'Sell Stocks', onOpen: () => fetchPortfolio() },
+          { id: 'profit', icon: '📊', label: 'View Profit / Loss', onOpen: () => fetchPortfolio() },
+          { id: 'history', icon: '📋', label: 'Transaction History', onOpen: () => fetchTransactions() },
+          { id: 'live', icon: '⚡', label: 'Live Stock Price', onOpen: () => { fetchStocks(); fetchAlphaVantage(); } },
+          { id: 'details', icon: '🔎', label: 'Stock Details', onOpen: () => fetchStocks() },
+          { id: 'my-stocks', icon: '💼', label: 'Your Stocks', onOpen: () => fetchPortfolio() },
+        ];
+
+        const adminNavItems = [
+          { id: 'admin-add', icon: '➕', label: 'Add New Stock', onOpen: () => { clearAction(); stockSymbol.value = ''; stockName.value = ''; stockPrice.value = ''; } },
+          { id: 'admin-update', icon: '🔄', label: 'Update Stock Details', onOpen: () => { clearAction(); fetchStocks(); stockSymbol.value = ''; stockName.value = ''; stockPrice.value = ''; } },
+          { id: 'admin-remove', icon: '❌', label: 'Remove Stock', onOpen: () => { clearAction(); fetchStocks(); stockSymbol.value = ''; } },
+          { id: 'admin-stocks', icon: '📊', label: 'View All Stocks', onOpen: () => fetchStocks() },
+          { id: 'admin-users', icon: '👥', label: 'View All Users', onOpen: () => fetchAdminUsers() },
+          { id: 'admin-db', icon: '🗄️', label: 'View All Database Data', onOpen: () => fetchDbDump() },
+        ];
+
+        const portfolioValue = computed(() => portfolio.value.reduce((s, x) => s + x.qty * x.price, 0));
+        const greeting = computed(() => {
+          const hour = new Date().getHours();
+          return hour < 12 ? 'Morning' : hour < 18 ? 'Afternoon' : 'Evening';
+        });
+        const filteredStocks = computed(() => {
+          if (!stockSearch.value) return allStocks.value;
+          const query = stockSearch.value.toLowerCase();
+          return allStocks.value.filter(stock => stock.symbol.toLowerCase().includes(query) || String(stock.name).toLowerCase().includes(query));
+        });
+        const filteredAdminUsers = computed(() => {
+          if (!userSearch.value) return adminUsers.value;
+          const query = userSearch.value.toLowerCase();
+          return adminUsers.value.filter(user => String(user.name).toLowerCase().includes(query) || String(user.email).toLowerCase().includes(query));
+        });
+        const estimatedBuyCost = computed(() => {
+          const s = allStocks.value.find(x => x.symbol === buySymbol.value);
+          if (!s || !buyQty.value) return '0.00';
+          return (s.price * Number(buyQty.value)).toFixed(2);
+        });
+        const estimatedSellRevenue = computed(() => {
+          const s = portfolio.value.find(x => x.symbol === sellSymbol.value);
+          if (!s || !sellQty.value) return '0.00';
+          return (s.price * Number(sellQty.value)).toFixed(2);
+        });
+
+        function clearAction() { actionOk.value = ''; actionErr.value = ''; }
+        function clearMsgs() { authErr.value = ''; authOk.value = ''; }
+        function goRegister() { clearMsgs(); page.value = 'register'; }
+        function post(url, body) { return fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams(body).toString() }).then(r => r.json()); }
+
+        async function doLogin() {
+          clearMsgs();
+          const d = await post('/api/login', { email: loginEmail.value, password: loginPass.value, type: loginType.value });
+          if (d.success) {
+            userName.value = d.name; currentEmail = loginEmail.value;
+            if (loginType.value === 'admin') { page.value = 'admin-dash'; activePanel.value = 'admin-stocks'; fetchStocks(); }
+            else { page.value = 'user-dash'; activePanel.value = 'wallet-add'; fetchWallet(); fetchStocks(); fetchPortfolio(); fetchTransactions(); }
+          } else { authErr.value = 'Invalid email or password.'; }
+        }
+        async function doRegister() {
+          clearMsgs();
+          if (regPass.value !== regPass2.value) { authErr.value = "Passwords don't match!"; return; }
+          if (regPass.value.length < 4) { authErr.value = "Password must be at least 4 characters."; return; }
+          const d = await post('/api/register', { name: regName.value, email: regEmail.value, password: regPass.value });
+          if (d.success) { authOk.value = '✅ Account created! Redirecting to login...'; setTimeout(() => { clearMsgs(); page.value = 'login'; }, 2000); }
+          else { authErr.value = d.message || 'Registration failed.'; }
+        }
+        function logout() {
+          page.value = 'login'; loginEmail.value = loginPass.value = ''; currentEmail = '';
+          portfolio.value = []; allStocks.value = []; transactions.value = []; walletBalance.value = 0;
+          clearMsgs(); clearAction();
+        }
+
+        async function fetchWallet() { const d = await fetch('/api/wallet?email=' + encodeURIComponent(currentEmail)).then(r => r.json()); walletBalance.value = d.balance || 0; }
+        async function fetchStocks() { allStocks.value = await fetch('/api/data?type=stocks').then(r => r.json()); }
+        async function fetchPortfolio() { portfolio.value = await fetch('/api/data?type=portfolio&email=' + encodeURIComponent(currentEmail)).then(r => r.json()); }
+        async function fetchTransactions() { transactions.value = await fetch('/api/transactions?email=' + encodeURIComponent(currentEmail)).then(r => r.json()); }
+        async function fetchAdminUsers() { adminUsers.value = await fetch('/api/admin/users').then(r => r.json()); }
+        async function fetchDbDump() { dbDump.value = await fetch('/api/admin/dbdump').then(r => r.json()); }
+
+        async function deleteUser(userId, userName) {
+          if (!confirm(`Are you sure you want to permanently delete user "${userName}" and all their data from the database?`)) return;
+          try {
+            const d = await post('/api/admin/delete-user', { user_id: userId });
+            if (d.success) {
+              actionOk.value = d.message || 'User deleted successfully!';
+              fetchAdminUsers();
+            } else {
+              actionErr.value = d.message || 'Failed to delete user';
+            }
+          } catch (e) {
+            actionErr.value = 'Error: ' + e.message;
+          }
+        }
+
+        async function fetchAlphaVantage() {
+          loadingIbm.value = true; ibmData.value = null;
+          try {
+            const r = await fetch('https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=IBM&apikey=G8FJ1208BC1PJD07');
+            const d = await r.json();
+            const dailyData = d['Time Series (Daily)'];
+            if (dailyData && dailyData['2026-04-02']) {
+              ibmData.value = dailyData['2026-04-02'];
+              ibmDate.value = '2026-04-02';
+            } else if (dailyData) {
+              const latestDate = Object.keys(dailyData)[0];
+              ibmData.value = dailyData[latestDate];
+              ibmDate.value = latestDate + " (Latest Available)";
+            } else {
+              // Final Fallback: use mock data if API fails or rate limited
+              ibmData.value = { "1. open": "145.20", "2. high": "148.50", "3. low": "144.10", "4. close": "147.30", "5. volume": "4500000" };
+              ibmDate.value = "2026-04-02 (Simulated Data)";
+            }
+          } catch (e) {
+            console.error(e);
+            // Error Fallback
+            ibmData.value = { "1. open": "145.20", "2. high": "148.50", "3. low": "144.10", "4. close": "147.30", "5. volume": "4500000" };
+            ibmDate.value = "2026-04-02 (Offline Mode)";
+          }
+          loadingIbm.value = false;
+        }
+
+        async function addFunds() {
+          clearAction();
+          const d = await post('/api/wallet', { email: currentEmail, amount: addAmt.value });
+          if (d.success) { actionOk.value = d.message; walletBalance.value = d.balance; addAmt.value = ''; }
+          else { actionErr.value = d.message; }
+        }
+        async function buyStock() {
+          clearAction();
+          const d = await post('/api/buy', { email: currentEmail, symbol: buySymbol.value, qty: buyQty.value });
+          if (d.success) { actionOk.value = d.message; fetchWallet(); fetchPortfolio(); buyQty.value = ''; buySymbol.value = ''; }
+          else { actionErr.value = d.message; }
+        }
+        async function sellStock() {
+          clearAction();
+          const d = await post('/api/sell', { email: currentEmail, symbol: sellSymbol.value, qty: sellQty.value });
+          if (d.success) { actionOk.value = d.message; fetchWallet(); fetchPortfolio(); sellQty.value = ''; sellSymbol.value = ''; }
+          else { actionErr.value = d.message; }
+        }
+
+        // Admin Actions
+        async function adminAddStock() {
+          clearAction();
+          const d = await post('/api/admin/stock/add', { symbol: stockSymbol.value, name: stockName.value, price: stockPrice.value });
+          if (d.success) { actionOk.value = d.message; stockSymbol.value = ''; stockName.value = ''; stockPrice.value = ''; }
+          else { actionErr.value = d.message; }
+        }
+        async function adminUpdateStock() {
+          clearAction();
+          const d = await post('/api/admin/stock/update', { symbol: stockSymbol.value, name: stockName.value, price: stockPrice.value });
+          if (d.success) { actionOk.value = d.message; fetchStocks(); }
+          else { actionErr.value = d.message; }
+        }
+        async function adminRemoveStock() {
+          clearAction();
+          const d = await post('/api/admin/stock/remove', { symbol: stockSymbol.value });
+          if (d.success) { actionOk.value = d.message; fetchStocks(); }
+          else { actionErr.value = d.message; }
+        }
+
+        return {
+          page, loginType, loginEmail, loginPass, regName, regEmail, regPass, regPass2,
+          userName, authErr, authOk, activePanel, navItems, adminNavItems,
+          walletBalance, portfolio, allStocks, transactions, adminUsers, dbDump,
+          portfolioValue, greeting, filteredStocks, filteredAdminUsers, estimatedBuyCost, estimatedSellRevenue,
+          addAmt, buySymbol, buyQty, sellSymbol, sellQty, stockSearch, userSearch, actionOk, actionErr,
+          stockSymbol, stockName, stockPrice,
+          doLogin, doRegister, goRegister, logout, addFunds, buyStock, sellStock,
+          adminAddStock, adminUpdateStock, adminRemoveStock
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+
+</html>
