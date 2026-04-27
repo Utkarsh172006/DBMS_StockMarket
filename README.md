@@ -6,6 +6,7 @@
 - Aditya Agrahari - RA2411030030044
 
 ## Project Resources
+<<<<<<< HEAD
 | Serial no. |           Description               |                                  Link                                                         |
 |-----------:|-------------------------------------|-----------------------------------------------------------------------------------------------|
 | 1          | Project Code (Executable)           |https://github.com/Utkarsh172006/DBMS_StockMarket/tree/main/Stocks-DBMS                        |
@@ -17,6 +18,19 @@
 | 7          | RA2411030030059_Course Report       |                                                                                               |
 | 8          | RA2411030030062_Course Report       |                                                                                               |
 | 9          | RA2411030030044_Course Report       |                                                                                               |                  
+=======
+| Serial no. |           Description               |                                  Link                                         |
+|-----------:|-------------------------------------|-------------------------------------------------------------------------------|
+| 1          | Project Code (Executable)           |https://github.com/Utkarsh172006/DBMS_StockMarket/tree/main/Stocks-DBMS        |
+| 2          | Project Report                      |https://github.com/Utkarsh172006/DBMS_StockMarket/blob/main/Project_Report.pdf |
+| 3          | Final PPT                           |                                                                               |
+| 4          | RA2441030030059_Certificate         |https://shorturl.at/iJ0GN                                                      | 
+| 5          | RA2411030030062_Certificate         |https://moonshot.scaler.com/s/sl/AfL7jbeUnM                                    |
+| 6          | RA2411030030044_Certificate         |https://shorturl.at/vmBl7                                                      |
+| 7          | RA2411030030059_Course Report       |                                                                               |
+| 8          | RA2411030030062_Course Report       |                                                                               |
+| 9          | RA2411030030044_Course Report       |                                                                               |              
+>>>>>>> 5e75095 (init)
 
 
 ## Folder Structure
