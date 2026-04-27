@@ -11,13 +11,13 @@
 |-----------:|-------------------------------------|-----------------------------------------------------------------------------------------------|
 | 1          | Project Code (Executable)           |https://github.com/Utkarsh172006/DBMS_StockMarket/tree/main/Stocks-DBMS                        |
 | 2          | Project Report                      |https://github.com/Utkarsh172006/DBMS_StockMarket/blob/main/Project_Report.pdf                 |
-| 3          | Final PPT                           |                                                                                               |
+| 3          | Final PPT                           |https://github.com/Utkarsh172006/DBMS_StockMarket/blob/main/dbms_final_ppt.pptx                |
 | 4          | RA2441030030059_Certificate         |https://github.com/Utkarsh172006/DBMS_StockMarket/blob/main/RA2411030030059_Certificate.png    |                                                     
 | 5          | RA2411030030062_Certificate         |https://github.com/Utkarsh172006/DBMS_StockMarket/blob/main/RA2411030030062_Certificate.png    |                                                
 | 6          | RA2411030030044_Certificate         |https://github.com/Utkarsh172006/DBMS_StockMarket/blob/main/RA2411030030044_Certificate.jpeg   |
-| 7          | RA2411030030059_Course Report       |                                                                                               |
-| 8          | RA2411030030062_Course Report       |                                                                                               |
-| 9          | RA2411030030044_Course Report       |                                                                                               |                  
+| 7          | RA2411030030059_Course Report       |https://github.com/Utkarsh172006/DBMS_StockMarket/blob/main/course_report_59.pdf               |
+| 8          | RA2411030030062_Course Report       |https://github.com/Utkarsh172006/DBMS_StockMarket/blob/main/course_report_62%20(2).pdf         |                                                                                      
+| 9          | RA2411030030044_Course Report       |https://github.com/Utkarsh172006/DBMS_StockMarket/blob/main/course_report_44.pdf               |                                                                                               
 =======
 | Serial no. |           Description               |                                  Link                                         |
 |-----------:|-------------------------------------|-------------------------------------------------------------------------------|
