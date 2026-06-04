@@ -1,24 +1,190 @@
-# Stock Market Portfolio Management System
+# ***Stock Market Portfolio Management System***
 
+## Overview
 
-## Folder Structure
+The Stock Market Portfolio Management System is a web application designed to manage stock market operations efficiently. The system enables users to buy and sell stocks, manage portfolios, track transactions, and maintain wallet balances through a web-based interface. It integrates a frontend, backend, and MySQL database for data storage and management.
 
-The workspace contains two folders by default, where:
+## Features
 
-- `src`: the folder to maintain sources
-- `lib`: the folder to maintain dependencies
+### User Management
 
-Meanwhile, the compiled output files will be generated in the `bin` folder by default.
+* User registration
+* User login
+* Authentication and authorization
+* Profile management
 
-## Getting Started 
+### Stock Management
 
-To start the project on https://localhost:8080 
-    --> Start mySQL Command Line Client 
-    --> In the DBconnection.java file 
-            - In line no.6 :- Enter your Database url (For eg: jdbc:database_used://localhost:your_db_port/database_name")
-            - In line no.7 :- Enter your Database name (Majorly used: root)
-            - In line no.8 :- Enter your mySQL command line client password
-    --> In the `lib` folder add (mySQL connector jar file) 
-    --> In the terminal write (javac *. java) or (javac Main.java)
+* View stock listings
+* Update stock prices
+* Track available shares
 
-## THE WEB SERVER WILL START AT `http://localhost:8080`.
+### Portfolio Management
+
+* Buy stocks
+* Sell stocks
+* View portfolio holdings
+* Calculate portfolio value
+
+### Wallet Management
+
+* Maintain wallet balance
+* Secure wallet access
+* Process stock transactions
+
+### Transaction Tracking
+
+* Record transactions
+* View transaction history
+* Timestamp-based transaction logging
+
+## Technology Stack
+
+| Component       | Technology                |
+| --------------- | ------------------------- |
+| Backend         | Java SE                   |
+| Database        | MySQL                     |
+| Database Access | JDBC                      |
+| HTTP Server     | Java Built-in HTTP Server |
+| Frontend        | HTML, CSS, JavaScript     |
+| UI Framework    | Vue 3 (CDN)               |
+
+## Database Schema
+
+### admins
+
+| Column   | Type                           |
+| -------- | ------------------------------ |
+| id       | INT AUTO_INCREMENT PRIMARY KEY |
+| name     | VARCHAR(255)                   |
+| email    | VARCHAR(255) UNIQUE            |
+| password | VARCHAR(255)                   |
+
+### users
+
+| Column   | Type                           |
+| -------- | ------------------------------ |
+| id       | INT AUTO_INCREMENT PRIMARY KEY |
+| name     | VARCHAR(255)                   |
+| email    | VARCHAR(255) UNIQUE            |
+| password | VARCHAR(255)                   |
+
+### stocks
+
+| Column | Type                           |
+| ------ | ------------------------------ |
+| id     | INT AUTO_INCREMENT PRIMARY KEY |
+| symbol | VARCHAR(50) UNIQUE             |
+| name   | VARCHAR(255)                   |
+| price  | DOUBLE                         |
+
+### user_portfolio
+
+| Column   | Type                           |
+| -------- | ------------------------------ |
+| id       | INT AUTO_INCREMENT PRIMARY KEY |
+| email    | VARCHAR(255)                   |
+| symbol   | VARCHAR(50)                    |
+| quantity | INT                            |
+
+### wallet
+
+| Column   | Type                           |
+| -------- | ------------------------------ |
+| id       | INT AUTO_INCREMENT PRIMARY KEY |
+| email    | VARCHAR(255) UNIQUE            |
+| password | VARCHAR(255)                   |
+| balance  | DOUBLE DEFAULT 0.0             |
+
+### transactions
+
+| Column          | Type                                |
+| --------------- | ----------------------------------- |
+| id              | INT AUTO_INCREMENT PRIMARY KEY      |
+| wallet_password | VARCHAR(255)                        |
+| type            | VARCHAR(50)                         |
+| amount          | DOUBLE                              |
+| date            | TIMESTAMP DEFAULT CURRENT_TIMESTAMP |
+
+## Getting Started
+
+### Prerequisites
+
+* Java JDK 8 or higher
+* MySQL Server
+* MySQL Connector/J
+
+### Clone Repository
+
+```bash
+git clone https://github.com/your-username/StockMarketPortfolioManagement.git
+cd StockMarketPortfolioManagement
+```
+
+### Configure Database
+
+Open `DBConnection.java` and update the following values:
+
+```java
+private static final String URL = "jdbc:mysql://localhost:3306/database_name";
+private static final String USERNAME = "root";
+private static final String PASSWORD = "your_password";
+```
+
+### Add MySQL Connector
+
+Place the MySQL Connector JAR file inside the `lib` directory.
+
+### Compile the Project
+
+```bash
+javac *.java
+```
+
+or
+
+```bash
+javac Main.java
+```
+
+### Run the Application
+
+```bash
+java Main
+```
+
+## Application URL
+
+After successful execution, the web server starts at:
+
+```text
+http://localhost:8080
+```
+
+## Project Structure
+
+```text
+StockMarketPortfolioManagement/
+│
+├── src/
+│   ├── Main.java
+│   ├── DBConnection.java
+│   └── Other Java Files
+│
+├── frontend/
+│   ├── index.html
+│   ├── css/
+│   └── js/
+│
+├── lib/
+│   └── mysql-connector.jar
+│
+├── bin/
+│   └── Compiled Class Files
+│
+└── README.md
+```
+
+## Author
+
+- Utkarsh Kumar Srivastava
